@@ -1,9 +1,18 @@
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Depends, HTTPException
 from datetime import datetime
 from sqlalchemy.orm import Session
 import bancodedados
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Criar tabelas se nao existirem
 bancodedados.Base.metadata.create_all(bind=bancodedados.engine)
@@ -96,3 +105,34 @@ def create_lesson(dados: dict, db: Session = Depends(get_db)):
 
     # Retorna o ID da nova aula e o status de sucesso
     return {"id": new_lesson.id, "status": "aula adicionada"}
+
+# Rota unificada para login
+@app.post("/login")
+def login(dados: dict, db: Session = Depends(get_db)):
+    # Procura o usuario pelo email
+    usuario = db.query(bancodedados.User).filter(bancodedados.User.email == dados.get("email")).first()
+    
+    # Se nao achar ou a senha estiver errada avisa o erro
+    if not usuario or usuario.password != dados.get("password"):
+        raise HTTPException(status_code=401, detail="E-mail ou senha incorretos")
+    
+    # Retorna os dados necessários para o React 
+    return {
+        "message": "Bem-vindo!", 
+        "user_id": usuario.id, 
+        "name": usuario.name
+    }
+
+
+# Rota nova para listar os cursos que aparecerao na Dashboard
+@app.get("/courses/")
+def list_courses(db: Session = Depends(get_db)):
+    # Essa linha busca todos os cursos salvos no banco para mostrar na tela
+    return db.query(bancodedados.Course).all()
+
+
+# Rota para buscar aulas de UM curso específico (Filtragem)
+@app.get("/lessons/{course_id}")
+def get_lessons_by_course(course_id: int, db: Session = Depends(get_db)):
+    # O banco de dados procura todas as aulas que possuem o ID do curso clicado
+    return db.query(bancodedados.Lesson).filter(bancodedados.Lesson.course_id == course_id).all()
