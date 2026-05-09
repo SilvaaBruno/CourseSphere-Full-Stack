@@ -136,3 +136,33 @@ def list_courses(db: Session = Depends(get_db)):
 def get_lessons_by_course(course_id: int, db: Session = Depends(get_db)):
     # O banco de dados procura todas as aulas que possuem o ID do curso clicado
     return db.query(bancodedados.Lesson).filter(bancodedados.Lesson.course_id == course_id).all()
+
+
+# Rota para DELETAR um curso do banco de dados
+@app.delete("/courses/{course_id}")
+def delete_course(course_id: int, db: Session = Depends(get_db)):
+    # O Python procura o curso pelo ID que veio do React
+    curso = db.query(bancodedados.Course).filter(bancodedados.Course.id == course_id).first()
+    
+    if not curso:
+        raise HTTPException(status_code=404, detail="Curso não encontrado")
+    
+    # Se achou, ele apaga e salva a alteração no banco
+    db.delete(curso)
+    db.commit()
+    return {"message": "Curso removido com sucesso"}
+
+
+# Rota para ELIMINAR uma aula específica (Requisito de CRUD completo do PDF)
+@app.delete("/lessons/{lesson_id}")
+def delete_lesson(lesson_id: int, db: Session = Depends(get_db)):
+    # O Python procura a aula pelo ID único dela
+    aula = db.query(bancodedados.Lesson).filter(bancodedados.Lesson.id == lesson_id).first()
+    
+    if not aula:
+        raise HTTPException(status_code=404, detail="Aula não encontrada")
+    
+    # Se encontrar, apaga do banco de dados e salva
+    db.delete(aula)
+    db.commit()
+    return {"message": "Aula removida com sucesso"}
