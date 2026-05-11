@@ -14,6 +14,13 @@ function Dashboard() {
   const [dataInicio, setDataInicio] = useState('') 
   const [dataFim, setDataFim] = useState('')
 
+  // POLIMENTO: Função que usei para deixar a data no padrão brasileiro (DD/MM/AAAA)
+  const formatarDataBR = (dataStr) => {
+    if (!dataStr) return 'Sem data'
+    const [ano, mes, dia] = dataStr.split('-')
+    return `${dia}/${mes}/${ano}`
+  }
+
   // Pegando as informações que salvamos no "crachá" (localStorage) lá no login
   const nomeUsuario = localStorage.getItem('userName') || 'Usuário'
   const userId = localStorage.getItem('userId')
@@ -113,35 +120,35 @@ function Dashboard() {
                 placeholder="Digite o nome do curso..." 
                 value={nomeCurso}
                 onChange={(e) => setNomeCurso(e.target.value)}
-                style={{ padding: '10px' }}
+                style={{ padding: '10px', borderRadius: '5px', border: '1px solid #374151', backgroundColor: '#374151', color: 'white' }}
                 required 
               />
               
               {/* Campos de data adicionados para cumprir a regra de negócio do PDF */}
               <div style={{ display: 'flex', gap: '10px' }}>
                 <div style={{ flex: 1 }}>
-                  <label style={{ fontSize: '12px', display: 'block' }}>Início:</label>
+                  <label style={{ fontSize: '12px', display: 'block', marginBottom: '5px' }}>Início:</label>
                   <input 
                     type="date" 
                     value={dataInicio}
                     onChange={(e) => setDataInicio(e.target.value)}
-                    style={{ padding: '10px', width: '100%' }}
+                    style={{ padding: '10px', width: '100%', borderRadius: '5px', border: '1px solid #374151', backgroundColor: '#374151', color: 'white' }}
                     required 
                   />
                 </div>
                 <div style={{ flex: 1 }}>
-                  <label style={{ fontSize: '12px', display: 'block' }}>Término:</label>
+                  <label style={{ fontSize: '12px', display: 'block', marginBottom: '5px' }}>Término:</label>
                   <input 
                     type="date" 
                     value={dataFim}
                     onChange={(e) => setDataFim(e.target.value)}
-                    style={{ padding: '10px', width: '100%' }}
+                    style={{ padding: '10px', width: '100%', borderRadius: '5px', border: '1px solid #374151', backgroundColor: '#374151', color: 'white' }}
                     required 
                   />
                 </div>
               </div>
 
-              <button type="submit" style={{ padding: '10px 20px', backgroundColor: '#10b981', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>
+              <button type="submit" style={{ padding: '10px 20px', backgroundColor: '#10b981', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 'bold', borderRadius: '5px' }}>
                 Salvar Curso
               </button>
             </div>
@@ -162,14 +169,25 @@ function Dashboard() {
         {/* Seção que mostra os cursos cadastrados */}
         <section>
           <h3>📚 Meus Cursos Disponíveis</h3>
+          
+          {/* POLIMENTO: Se o cara digitar um nome que não existe, eu mostro esse aviso */}
+          {cursos.length > 0 && cursosFiltrados.length === 0 && (
+            <p style={{ textAlign: 'center', color: '#9ca3af' }}>Nenhum curso encontrado com o nome "{busca}".</p>
+          )}
+
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-            {cursosFiltrados.length === 0 ? <p>Nenhum curso encontrado.</p> : null}
+            {cursosFiltrados.length === 0 && cursos.length === 0 ? <p>Nenhum curso cadastrado ainda.</p> : null}
             
             {/* O .map agora usa a lista filtrada em vez da lista cheia */}
             {cursosFiltrados.map(curso => (
               <div key={curso.id} style={{ backgroundColor: '#1f2937', padding: '20px', borderRadius: '10px', border: '1px solid #374151' }}>
-                <h4 style={{ margin: '0 0 10px 0' }}>{curso.name}</h4>
-                <p style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '10px' }}>Termina em: {curso.end_date}</p>
+                <h4 style={{ margin: '0 0 10px 0', color: '#60a5fa' }}>{curso.name}</h4>
+                
+                {/* POLIMENTO: Mostrando as datas já formatadas para o padrão brasileiro */}
+                <p style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '15px' }}>
+                  📅 {formatarDataBR(curso.start_date)} até {formatarDataBR(curso.end_date)}
+                </p>
+
                 <div style={{ display: 'flex', gap: '10px' }}>
                   <button onClick={() => navigate(`/curso/${curso.id}`)} style={{ backgroundColor: '#3b82f6', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer' }}>
                     Acessar Aulas

@@ -25,7 +25,10 @@ O sistema foi construído seguindo os requisitos obrigatórios do edital, focand
 Para rodar o servidor, é necessário ter o Python instalado. Siga os passos abaixo dentro da pasta backend:
 
 1. Crie um ambiente virtual: python -m venv venv
-2. Ative o ambiente virtual: .\venv\Scripts\activate
+2. Ative o ambiente virtual:
+   - No Windows (PowerShell): .\venv\Scripts\activate
+   - Caso a pasta seja 'bin' (Linux/Mac ou Git Bash): .\venv\bin\activate
+   - Nota: Se houver erro de permissão no PowerShell, execute: Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
 3. Instale as dependências necessárias: pip install fastapi uvicorn sqlalchemy
 4. Inicie o servidor: uvicorn main:app --reload
 
